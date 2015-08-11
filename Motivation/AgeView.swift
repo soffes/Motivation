@@ -29,6 +29,8 @@ class AgeView: ScreenSaverView {
 		return ConfigurationWindowController()
 	}()
 
+	let counting = arc4random_uniform(50) != 0
+
 
 	// MARK: - Initializers
 
@@ -67,8 +69,12 @@ class AgeView: ScreenSaverView {
 
 	override func animateOneFrame() {
 		if let birthday = Preferences().birthday {
-			let age = birthday.timeIntervalSinceNow * -1 / 60 / 60 / 24 / 365
-			textLabel.stringValue = String(NSString(format: "%0.9f", age))
+			if counting {
+				let age = birthday.timeIntervalSinceNow * -1 / 60 / 60 / 24 / 365
+				textLabel.stringValue = String(NSString(format: "%0.9f", age))
+			} else {
+				textLabel.stringValue = "Life is long."
+			}
 		} else {
 			textLabel.stringValue = "Open Screen Saver Options to set your birthday."
 		}
