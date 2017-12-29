@@ -116,8 +116,8 @@ class AgeView: ScreenSaverView {
 		])
 
 		// Listen for configuration changes
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "motivationLevelDidChange:", name: Preferences.motivationLevelDidChangeNotificationName, object: nil)
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "birthdayDidChange:", name: Preferences.birthdayDidChangeNotificationName, object: nil)
+		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(AgeView.motivationLevelDidChange(_:)), name: Preferences.motivationLevelDidChangeNotificationName, object: nil)
+		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(AgeView.birthdayDidChange(_:)), name: Preferences.birthdayDidChangeNotificationName, object: nil)
 	}
 
 	/// Age calculation
