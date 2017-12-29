@@ -13,25 +13,25 @@ class AgeView: ScreenSaverView {
 
 	// MARK: - Properties
 
-	private let textLabel: NSTextField = {
+	fileprivate let textLabel: NSTextField = {
 		let label = NSTextField()
 		label.translatesAutoresizingMaskIntoConstraints = false
-		label.editable = false
+		label.isEditable = false
 		label.drawsBackground = false
-		label.bordered = false
-		label.bezeled = false
-		label.selectable = false
-		label.textColor = .whiteColor()
+		label.isBordered = false
+		label.isBezeled = false
+		label.isSelectable = false
+		label.textColor = .white
 		return label
 	}()
 
-	private lazy var configurationWindowController: NSWindowController = {
+	fileprivate lazy var configurationWindowController: NSWindowController = {
 		return ConfigurationWindowController()
 	}()
 
-	private var motivationLevel: MotivationLevel
+	fileprivate var motivationLevel: MotivationLevel
 
-	private var birthday: NSDate? {
+	fileprivate var birthday: Date? {
 		didSet {
 			updateFont()
 		}
@@ -41,7 +41,7 @@ class AgeView: ScreenSaverView {
 	// MARK: - Initializers
 
 	convenience init() {
-		self.init(frame: CGRectZero, isPreview: false)
+		self.init(frame: CGRect.zero, isPreview: false)
 	}
 
 	override init!(frame: NSRect, isPreview: Bool) {
@@ -57,22 +57,22 @@ class AgeView: ScreenSaverView {
 	}
 
 	deinit {
-		NSNotificationCenter.defaultCenter().removeObserver(self)
+		NotificationCenter.default.removeObserver(self)
 	}
 	
 
 	// MARK: - NSView
 
-	override func drawRect(rect: NSRect) {
-		let backgroundColor: NSColor = .blackColor()
+	override func draw(_ rect: NSRect) {
+		let backgroundColor: NSColor = .black
 
 		backgroundColor.setFill()
-		NSBezierPath.fillRect(bounds)
+		NSBezierPath.fill(bounds)
 	}
 
 	// If the screen saver changes size, update the font
-	override func resizeWithOldSuperviewSize(oldSize: NSSize) {
-		super.resizeWithOldSuperviewSize(oldSize)
+	override func resize(withOldSuperviewSize oldSize: NSSize) {
+		super.resize(withOldSuperviewSize: oldSize)
 		updateFont()
 	}
 
@@ -101,66 +101,66 @@ class AgeView: ScreenSaverView {
 	// MARK: - Private
 
 	/// Shared initializer
-	private func initialize() {
+	fileprivate func initialize() {
 		// Set animation time interval
 		animationTimeInterval = 1 / 30
 
 		// Recall preferences
-		birthday = Preferences().birthday
+		birthday = Preferences().birthday as! Date
 
 		// Setup the label
 		addSubview(textLabel)
 		addConstraints([
-			NSLayoutConstraint(item: textLabel, attribute: .CenterX, relatedBy: .Equal, toItem: self, attribute: .CenterX, multiplier: 1, constant: 0),
-			NSLayoutConstraint(item: textLabel, attribute: .CenterY, relatedBy: .Equal, toItem: self, attribute: .CenterY, multiplier: 1, constant: 0)
+			NSLayoutConstraint(item: textLabel, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0),
+			NSLayoutConstraint(item: textLabel, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: 0)
 		])
 
 		// Listen for configuration changes
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(AgeView.motivationLevelDidChange(_:)), name: Preferences.motivationLevelDidChangeNotificationName, object: nil)
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(AgeView.birthdayDidChange(_:)), name: Preferences.birthdayDidChangeNotificationName, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(AgeView.motivationLevelDidChange(_:)), name: NSNotification.Name(rawValue: Preferences.motivationLevelDidChangeNotificationName), object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(AgeView.birthdayDidChange(_:)), name: NSNotification.Name(rawValue: Preferences.birthdayDidChangeNotificationName), object: nil)
 	}
 
 	/// Age calculation
-	private func ageForBirthday(birthday: NSDate) -> Double {
-		let calendar = NSCalendar.currentCalendar()
-		let now = NSDate()
+	fileprivate func ageForBirthday(_ birthday: Date) -> Double {
+		let calendar = Calendar.current
+		let now = Date()
 
 		// An age is defined as the number of years you've been alive plus the number of days, seconds, and nanoseconds
 		// you've been alive out of that many units in the current year.
-		let components = calendar.components([NSCalendarUnit.Year, NSCalendarUnit.Day, NSCalendarUnit.Second, NSCalendarUnit.Nanosecond], fromDate: birthday, toDate: now, options: [])
+		let components = (calendar as NSCalendar).components([NSCalendar.Unit.year, NSCalendar.Unit.day, NSCalendar.Unit.second, NSCalendar.Unit.nanosecond], from: birthday, to: now, options: [])
 
 		// We calculate these every time since the values can change when you cross a boundary. Things are too
 		// complicated to try to figure out when that is and cache them. NSCalendar is made for this.
 		let daysInYear = Double(calendar.daysInYear(now) ?? 365)
-		let hoursInDay = Double(calendar.rangeOfUnit(NSCalendarUnit.Hour, inUnit: NSCalendarUnit.Day, forDate: now).length)
-		let minutesInHour = Double(calendar.rangeOfUnit(NSCalendarUnit.Minute, inUnit: NSCalendarUnit.Hour, forDate: now).length)
-		let secondsInMinute = Double(calendar.rangeOfUnit(NSCalendarUnit.Second, inUnit: NSCalendarUnit.Minute, forDate: now).length)
-		let nanosecondsInSecond = Double(calendar.rangeOfUnit(NSCalendarUnit.Nanosecond, inUnit: NSCalendarUnit.Second, forDate: now).length)
+		let hoursInDay = Double((calendar as NSCalendar).range(of: NSCalendar.Unit.hour, in: NSCalendar.Unit.day, for: now).length)
+		let minutesInHour = Double((calendar as NSCalendar).range(of: NSCalendar.Unit.minute, in: NSCalendar.Unit.hour, for: now).length)
+		let secondsInMinute = Double((calendar as NSCalendar).range(of: NSCalendar.Unit.second, in: NSCalendar.Unit.minute, for: now).length)
+		let nanosecondsInSecond = Double((calendar as NSCalendar).range(of: NSCalendar.Unit.nanosecond, in: NSCalendar.Unit.second, for: now).length)
 
 		// Now that we have all of the values, assembling them is easy. We don't get minutes and hours from the calendar
 		// since it will overflow nicely to seconds. We need days and years since the number of days in a year changes
 		// more frequently. This will handle leap seconds, days, and years.
-		let seconds = Double(components.second) + (Double(components.nanosecond) / nanosecondsInSecond)
+		let seconds = Double(components.second!) + (Double(components.nanosecond!) / nanosecondsInSecond)
 		let minutes = seconds / secondsInMinute
 		let hours = minutes / minutesInHour
-		let days = Double(components.day) + (hours / hoursInDay)
+		let days = Double(components.day!) + (hours / hoursInDay)
 		let years = Double(components.year) + (days / daysInYear)
 
 		return years
 	}
 
 	/// Motiviation level changed
-	@objc private func motivationLevelDidChange(notification: NSNotification?) {
+	@objc fileprivate func motivationLevelDidChange(_ notification: Notification?) {
 		motivationLevel = Preferences().motivationLevel
 	}
 
 	/// Birthday changed
-	@objc private func birthdayDidChange(notification: NSNotification?) {
-		birthday = Preferences().birthday
+	@objc fileprivate func birthdayDidChange(_ notification: Notification?) {
+		birthday = Preferences().birthday as! Date
 	}
 
 	/// Update the font for the current size
-	private func updateFont() {
+	fileprivate func updateFont() {
 		if birthday != nil {
 			textLabel.font = fontWithSize(bounds.width / 10)
 		} else {
@@ -169,17 +169,17 @@ class AgeView: ScreenSaverView {
 	}
 
 	/// Get a font
-	private func fontWithSize(fontSize: CGFloat, monospace: Bool = true) -> NSFont {
+	fileprivate func fontWithSize(_ fontSize: CGFloat, monospace: Bool = true) -> NSFont {
 		let font: NSFont
 		if #available(OSX 10.11, *) {
-			font = .systemFontOfSize(fontSize, weight: NSFontWeightThin)
+			font = .systemFont(ofSize: fontSize, weight: NSFontWeightThin)
 		} else {
 			font = NSFont(name: "HelveticaNeue-Thin", size: fontSize)!
 		}
 
 		let fontDescriptor: NSFontDescriptor
 		if monospace {
-			fontDescriptor = font.fontDescriptor.fontDescriptorByAddingAttributes([
+			fontDescriptor = font.fontDescriptor.addingAttributes([
 				NSFontFeatureSettingsAttribute: [
 					[
 						NSFontFeatureTypeIdentifierKey: kNumberSpacingType,

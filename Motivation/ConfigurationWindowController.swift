@@ -27,23 +27,23 @@ class ConfigurationWindowController: NSWindowController {
 		super.windowDidLoad()
 
 		switch Preferences().motivationLevel {
-		case .Light: lightRadio.state = NSOnState
-		case .Moderate: moderateRadio.state = NSOnState
-		case .Terrifying: terrifyingRadio.state = NSOnState
+		case .light: lightRadio.state = NSOnState
+		case .moderate: moderateRadio.state = NSOnState
+		case .terrifying: terrifyingRadio.state = NSOnState
 		}
 	}
 
 
 	// MARK: - Action
 
-	@IBAction func close(sender: AnyObject?) {
+	@IBAction func close(_ sender: AnyObject?) {
 		if let window = window {
 			window.sheetParent?.endSheet(window)
 		}
 	}
 
-	@IBAction func levelDidChange(sender: AnyObject?) {
-		guard let button = sender as? NSButton, level = MotivationLevel(rawValue: UInt(button.tag)) else { return }
+	@IBAction func levelDidChange(_ sender: AnyObject?) {
+		guard let button = sender as? NSButton, let level = MotivationLevel(rawValue: UInt(button.tag)) else { return }
 		Preferences().motivationLevel = level
 	}
 }
