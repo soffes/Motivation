@@ -106,7 +106,7 @@ class AgeView: ScreenSaverView {
 		animationTimeInterval = 1 / 30
 
 		// Recall preferences
-		birthday = Preferences().birthday as! Date
+		birthday = Preferences().birthday
 
 		// Setup the label
 		addSubview(textLabel)
@@ -144,7 +144,7 @@ class AgeView: ScreenSaverView {
 		let minutes = seconds / secondsInMinute
 		let hours = minutes / minutesInHour
 		let days = Double(components.day!) + (hours / hoursInDay)
-		let years = Double(components.year) + (days / daysInYear)
+		let years = Double(components.year!) + (days / daysInYear)
 
 		return years
 	}
@@ -156,7 +156,7 @@ class AgeView: ScreenSaverView {
 
 	/// Birthday changed
 	@objc fileprivate func birthdayDidChange(_ notification: Notification?) {
-		birthday = Preferences().birthday as! Date
+		birthday = Preferences().birthday
 	}
 
 	/// Update the font for the current size

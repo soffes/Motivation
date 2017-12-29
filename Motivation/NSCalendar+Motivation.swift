@@ -10,13 +10,13 @@ import Foundation
 
 extension Calendar {
 	func daysInYear(_ date: Date = Date()) -> Int? {
-		let year = dateComponents([NSCalendar.Unit.year], from: date).year
+		let year = dateComponents([.year], from: date).year
 		return daysInYear(year!)
 	}
 
 	func daysInYear(_ year: Int) -> Int? {
 		guard let begin = lastDayOfYear(year - 1), let end = lastDayOfYear(year) else { return nil }
-		return dateComponents([NSCalendar.Unit.day], from: begin, to: end, options: []).day
+		return dateComponents([.day], from: begin, to: end).day
 	}
 
 	func lastDayOfYear(_ year: Int) -> Date? {
@@ -24,11 +24,10 @@ extension Calendar {
 		components.year = year
 		guard let years = date(from: components) else { return nil }
 
-		components.month = range(of: NSCalendar.Unit.month, in: NSCalendar.Unit.year, for: years).length
-		guard let months = date(from: components) else { return nil }
+		components.month = range(of: Calendar.Component.month, in: Calendar.Component.year, for: years)?.count
+        guard let months = date(from: components) else { return nil }
 
-		components.day = range(of: NSCalendar.Unit.day, in: NSCalendar.Unit.month, for: months).length
-
+		components.day = range(of: Calendar.Component.day, in: Calendar.Component.month, for: months)?.count
 		return date(from: components)
 	}
 }
