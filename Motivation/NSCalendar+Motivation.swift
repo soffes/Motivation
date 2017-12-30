@@ -8,27 +8,26 @@
 
 import Foundation
 
-extension NSCalendar {
-	func daysInYear(date: NSDate = NSDate()) -> Int? {
-		let year = components([NSCalendarUnit.Year], fromDate: date).year
-		return daysInYear(year)
+extension Calendar {
+	func daysInYear(_ date: Date = Date()) -> Int? {
+		let year = dateComponents([.year], from: date).year
+		return daysInYear(year!)
 	}
 
-	func daysInYear(year: Int) -> Int? {
-		guard let begin = lastDayOfYear(year - 1), end = lastDayOfYear(year) else { return nil }
-		return components([NSCalendarUnit.Day], fromDate: begin, toDate: end, options: []).day
+	func daysInYear(_ year: Int) -> Int? {
+		guard let begin = lastDayOfYear(year - 1), let end = lastDayOfYear(year) else { return nil }
+		return dateComponents([.day], from: begin, to: end).day
 	}
 
-	func lastDayOfYear(year: Int) -> NSDate? {
-		let components = NSDateComponents()
+	func lastDayOfYear(_ year: Int) -> Date? {
+		var components = DateComponents()
 		components.year = year
-		guard let years = dateFromComponents(components) else { return nil }
+		guard let years = date(from: components) else { return nil }
 
-		components.month = rangeOfUnit(NSCalendarUnit.Month, inUnit: NSCalendarUnit.Year, forDate: years).length
-		guard let months = dateFromComponents(components) else { return nil }
+		components.month = range(of: Calendar.Component.month, in: Calendar.Component.year, for: years)?.count
+        guard let months = date(from: components) else { return nil }
 
-		components.day = rangeOfUnit(NSCalendarUnit.Day, inUnit: NSCalendarUnit.Month, forDate: months).length
-
-		return dateFromComponents(components)
+		components.day = range(of: Calendar.Component.day, in: Calendar.Component.month, for: months)?.count
+		return date(from: components)
 	}
 }

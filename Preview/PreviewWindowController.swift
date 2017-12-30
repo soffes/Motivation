@@ -22,7 +22,7 @@ class PreviewWindowController: NSWindowController {
 
 		window?.contentView = screenSaver
 
-		NSTimer.scheduledTimerWithTimeInterval(screenSaver.animationTimeInterval, target: screenSaver, selector: "animateOneFrame", userInfo: nil, repeats: true)
+		_ = Timer.scheduledTimer(timeInterval: screenSaver.animationTimeInterval, target: screenSaver, selector: #selector(AgeView.animateOneFrame), userInfo: nil, repeats: true)
 	}
 
 
