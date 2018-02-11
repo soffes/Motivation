@@ -8,27 +8,31 @@
 
 import Foundation
 
-extension NSCalendar {
-	func daysInYear(date: NSDate = NSDate()) -> Int? {
-		let year = components([NSCalendarUnit.Year], fromDate: date).year
-		return daysInYear(year)
+extension Calendar {
+	func daysInYear(date: Date = Date()) -> Int? {
+        let year = dateComponents([.year], from: date).year
+		return year.flatMap(days)
 	}
 
-	func daysInYear(year: Int) -> Int? {
-		guard let begin = lastDayOfYear(year - 1), end = lastDayOfYear(year) else { return nil }
-		return components([NSCalendarUnit.Day], fromDate: begin, toDate: end, options: []).day
+	func days(inYear year: Int) -> Int? {
+        guard let begin = lastDay(ofYear: year - 1), let end = lastDay(ofYear: year) else { return nil }
+		return dateComponents([.day], from: begin, to: end).day
 	}
 
-	func lastDayOfYear(year: Int) -> NSDate? {
-		let components = NSDateComponents()
+	func lastDay(ofYear year: Int) -> Date? {
+		var components = DateComponents()
 		components.year = year
-		guard let years = dateFromComponents(components) else { return nil }
 
-		components.month = rangeOfUnit(NSCalendarUnit.Month, inUnit: NSCalendarUnit.Year, forDate: years).length
-		guard let months = dateFromComponents(components) else { return nil }
+        guard let years = date(from: components),
+            let month = range(of: .month, in: .year, for: years)?.count else { return nil }
 
-		components.day = rangeOfUnit(NSCalendarUnit.Day, inUnit: NSCalendarUnit.Month, forDate: months).length
+        components.month = month
 
-		return dateFromComponents(components)
+        guard let months = date(from: components),
+            let day = range(of: .day, in: .month, for: months)?.count else { return nil }
+
+		components.day = day
+
+        return date(from: components)
 	}
 }

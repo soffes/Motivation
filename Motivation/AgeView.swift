@@ -16,12 +16,12 @@ class AgeView: ScreenSaverView {
 	private let textLabel: NSTextField = {
 		let label = NSTextField()
 		label.translatesAutoresizingMaskIntoConstraints = false
-		label.editable = false
+		label.isEditable = false
 		label.drawsBackground = false
-		label.bordered = false
-		label.bezeled = false
-		label.selectable = false
-		label.textColor = .whiteColor()
+		label.isBordered = false
+		label.isBezeled = false
+		label.isSelectable = false
+		label.textColor = .white
 		return label
 	}()
 
@@ -31,7 +31,7 @@ class AgeView: ScreenSaverView {
 
 	private var motivationLevel: MotivationLevel
 
-	private var birthday: NSDate? {
+	private var birthday: Date? {
 		didSet {
 			updateFont()
 		}
@@ -41,7 +41,7 @@ class AgeView: ScreenSaverView {
 	// MARK: - Initializers
 
 	convenience init() {
-		self.init(frame: CGRectZero, isPreview: false)
+		self.init(frame: .zero, isPreview: false)
 	}
 
 	override init!(frame: NSRect, isPreview: Bool) {
@@ -57,22 +57,22 @@ class AgeView: ScreenSaverView {
 	}
 
 	deinit {
-		NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
 	}
 	
 
 	// MARK: - NSView
 
-	override func drawRect(rect: NSRect) {
-		let backgroundColor: NSColor = .blackColor()
+    override func draw(_ rect: NSRect) {
+        let backgroundColor: NSColor = .black
 
 		backgroundColor.setFill()
-		NSBezierPath.fillRect(bounds)
+        NSBezierPath.fill(bounds)
 	}
 
 	// If the screen saver changes size, update the font
-	override func resizeWithOldSuperviewSize(oldSize: NSSize) {
-		super.resizeWithOldSuperviewSize(oldSize)
+    override func resize(withOldSuperviewSize oldSize: NSSize) {
+        super.resize(withOldSuperviewSize: oldSize)
 		updateFont()
 	}
 
@@ -81,7 +81,7 @@ class AgeView: ScreenSaverView {
 
 	override func animateOneFrame() {
 		if let birthday = birthday {
-			let age = ageForBirthday(birthday)
+            let age = self.age(forBirthday: birthday)
 			let format = "%0.\(motivationLevel.decimalPlaces)f"
 			textLabel.stringValue = String(format: format, age)
 		} else {
@@ -89,11 +89,11 @@ class AgeView: ScreenSaverView {
 		}
 	}
 
-	override func hasConfigureSheet() -> Bool {
+    override var hasConfigureSheet: Bool {
 		return true
 	}
 
-	override func configureSheet() -> NSWindow? {
+    override var configureSheet: NSWindow? {
 		return configurationWindowController.window
 	}
 	
@@ -111,40 +111,40 @@ class AgeView: ScreenSaverView {
 		// Setup the label
 		addSubview(textLabel)
 		addConstraints([
-			NSLayoutConstraint(item: textLabel, attribute: .CenterX, relatedBy: .Equal, toItem: self, attribute: .CenterX, multiplier: 1, constant: 0),
-			NSLayoutConstraint(item: textLabel, attribute: .CenterY, relatedBy: .Equal, toItem: self, attribute: .CenterY, multiplier: 1, constant: 0)
+            NSLayoutConstraint(item: textLabel, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: textLabel, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: 0)
 		])
 
 		// Listen for configuration changes
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "motivationLevelDidChange:", name: Preferences.motivationLevelDidChangeNotificationName, object: nil)
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "birthdayDidChange:", name: Preferences.birthdayDidChangeNotificationName, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(motivationLevelDidChange), name: Preferences.motivationLevelDidChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(birthdayDidChange), name: Preferences.birthdayDidChangeNotification, object: nil)
 	}
 
 	/// Age calculation
-	private func ageForBirthday(birthday: NSDate) -> Double {
-		let calendar = NSCalendar.currentCalendar()
-		let now = NSDate()
+	private func age(forBirthday birthday: Date) -> Double {
+		let calendar = Calendar.current
+		let now = Date()
 
 		// An age is defined as the number of years you've been alive plus the number of days, seconds, and nanoseconds
 		// you've been alive out of that many units in the current year.
-		let components = calendar.components([NSCalendarUnit.Year, NSCalendarUnit.Day, NSCalendarUnit.Second, NSCalendarUnit.Nanosecond], fromDate: birthday, toDate: now, options: [])
+		let components = calendar.dateComponents([.year, .day, .second, .nanosecond], from: birthday, to: now)
 
 		// We calculate these every time since the values can change when you cross a boundary. Things are too
 		// complicated to try to figure out when that is and cache them. NSCalendar is made for this.
-		let daysInYear = Double(calendar.daysInYear(now) ?? 365)
-		let hoursInDay = Double(calendar.rangeOfUnit(NSCalendarUnit.Hour, inUnit: NSCalendarUnit.Day, forDate: now).length)
-		let minutesInHour = Double(calendar.rangeOfUnit(NSCalendarUnit.Minute, inUnit: NSCalendarUnit.Hour, forDate: now).length)
-		let secondsInMinute = Double(calendar.rangeOfUnit(NSCalendarUnit.Second, inUnit: NSCalendarUnit.Minute, forDate: now).length)
-		let nanosecondsInSecond = Double(calendar.rangeOfUnit(NSCalendarUnit.Nanosecond, inUnit: NSCalendarUnit.Second, forDate: now).length)
+        let daysInYear = Double(calendar.days(inYear: components.year!) ?? 365)
+        let hoursInDay = Double(calendar.range(of: .hour, in: .day, for: now)!.count)
+        let minutesInHour = Double(calendar.range(of: .minute, in: .hour, for: now)!.count)
+        let secondsInMinute = Double(calendar.range(of: .second, in: .minute, for: now)!.count)
+        let nanosecondsInSecond = Double(calendar.range(of: .nanosecond, in: .second, for: now)!.count)
 
 		// Now that we have all of the values, assembling them is easy. We don't get minutes and hours from the calendar
 		// since it will overflow nicely to seconds. We need days and years since the number of days in a year changes
 		// more frequently. This will handle leap seconds, days, and years.
-		let seconds = Double(components.second) + (Double(components.nanosecond) / nanosecondsInSecond)
+		let seconds = Double(components.second!) + (Double(components.nanosecond!) / nanosecondsInSecond)
 		let minutes = seconds / secondsInMinute
 		let hours = minutes / minutesInHour
-		let days = Double(components.day) + (hours / hoursInDay)
-		let years = Double(components.year) + (days / daysInYear)
+		let days = Double(components.day!) + (hours / hoursInDay)
+		let years = Double(components.year!) + (days / daysInYear)
 
 		return years
 	}
@@ -162,28 +162,28 @@ class AgeView: ScreenSaverView {
 	/// Update the font for the current size
 	private func updateFont() {
 		if birthday != nil {
-			textLabel.font = fontWithSize(bounds.width / 10)
+            textLabel.font = font(ofSize: bounds.width / 10)
 		} else {
-			textLabel.font = fontWithSize(bounds.width / 30, monospace: false)
+            textLabel.font = font(ofSize: bounds.width / 30, isMonospaced: false)
 		}
 	}
 
 	/// Get a font
-	private func fontWithSize(fontSize: CGFloat, monospace: Bool = true) -> NSFont {
+	private func font(ofSize fontSize: CGFloat, isMonospaced: Bool = true) -> NSFont {
 		let font: NSFont
 		if #available(OSX 10.11, *) {
-			font = .systemFontOfSize(fontSize, weight: NSFontWeightThin)
+            font = .systemFont(ofSize: fontSize, weight: .thin)
 		} else {
 			font = NSFont(name: "HelveticaNeue-Thin", size: fontSize)!
 		}
 
 		let fontDescriptor: NSFontDescriptor
-		if monospace {
-			fontDescriptor = font.fontDescriptor.fontDescriptorByAddingAttributes([
-				NSFontFeatureSettingsAttribute: [
+		if isMonospaced {
+            fontDescriptor = font.fontDescriptor.addingAttributes([
+                NSFontDescriptor.AttributeName.featureSettings: [
 					[
-						NSFontFeatureTypeIdentifierKey: kNumberSpacingType,
-						NSFontFeatureSelectorIdentifierKey: kMonospacedNumbersSelector
+                        NSFontDescriptor.FeatureKey.typeIdentifier: kNumberSpacingType,
+                        NSFontDescriptor.FeatureKey.selectorIdentifier: kMonospacedNumbersSelector
 					]
 				]
 			])

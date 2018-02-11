@@ -16,8 +16,8 @@ class ConfigurationWindowController: NSWindowController {
 	@IBOutlet weak var moderateRadio: NSButton!
 	@IBOutlet weak var terrifyingRadio: NSButton!
 
-	override var windowNibName: String {
-		return "Configuration"
+	override var windowNibName: NSNib.Name {
+        return NSNib.Name(rawValue: "Configuration")
 	}
 
 
@@ -27,9 +27,9 @@ class ConfigurationWindowController: NSWindowController {
 		super.windowDidLoad()
 
 		switch Preferences().motivationLevel {
-		case .Light: lightRadio.state = NSOnState
-		case .Moderate: moderateRadio.state = NSOnState
-		case .Terrifying: terrifyingRadio.state = NSOnState
+		case .light: lightRadio.state = .on
+		case .moderate: moderateRadio.state = .on
+		case .terrifying: terrifyingRadio.state = .on
 		}
 	}
 
@@ -43,7 +43,7 @@ class ConfigurationWindowController: NSWindowController {
 	}
 
 	@IBAction func levelDidChange(sender: AnyObject?) {
-		guard let button = sender as? NSButton, level = MotivationLevel(rawValue: UInt(button.tag)) else { return }
+		guard let button = sender as? NSButton, let level = MotivationLevel(rawValue: UInt(button.tag)) else { return }
 		Preferences().motivationLevel = level
 	}
 }

@@ -10,13 +10,13 @@ import Foundation
 import ScreenSaver
 
 enum MotivationLevel: UInt {
-	case Light, Moderate, Terrifying
+	case light, moderate, terrifying
 
 	var decimalPlaces: UInt {
 		switch self {
-		case Light: return 7
-		case Moderate: return 8
-		case Terrifying: return 9
+		case .light: return 7
+		case .moderate: return 8
+		case .terrifying: return 9
 		}
 	}
 }
@@ -25,43 +25,43 @@ class Preferences: NSObject {
 
 	// MARK: - Properties
 
-	static var birthdayDidChangeNotificationName = "Preferences.birthdayDidChangeNotification"
-	static var motivationLevelDidChangeNotificationName = "Preferences.motivationLevelDidChangeNotification"
+    static let birthdayDidChangeNotification = Notification.Name(rawValue: "Preferences.birthdayDidChangeNotification")
+    static let motivationLevelDidChangeNotification = Notification.Name(rawValue: "Preferences.motivationLevelDidChangeNotification")
 
-	var birthday: NSDate? {
+	var birthday: Date? {
 		get {
-			let timestamp = defaults?.objectForKey("Birthday") as? NSTimeInterval
-			return timestamp.map { NSDate(timeIntervalSince1970: $0) }
+            let timestamp = defaults?.object(forKey: "Birthday") as? TimeInterval
+			return timestamp.map { Date(timeIntervalSince1970: $0) }
 		}
 
 		set {
 			if let date = newValue {
-				defaults?.setObject(date.timeIntervalSince1970, forKey: "Birthday")
+                defaults?.set(date.timeIntervalSince1970, forKey: "Birthday")
 			} else {
-				defaults?.removeObjectForKey("Birthday")
+                defaults?.removeObject(forKey: "Birthday")
 			}
 			defaults?.synchronize()
 
-			NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.birthdayDidChangeNotificationName, object: newValue)
+            NotificationCenter.default.post(name: type(of: self).birthdayDidChangeNotification, object: newValue)
 		}
 	}
 
 	var motivationLevel: MotivationLevel {
 		get {
-			let uint = defaults?.objectForKey("MotivationLevel") as? UInt
-			return uint.flatMap { MotivationLevel(rawValue: $0) } ?? .Terrifying
+            let uint = defaults?.object(forKey: "MotivationLevel") as? UInt
+			return uint.flatMap { MotivationLevel(rawValue: $0) } ?? .terrifying
 		}
 
 		set {
-			defaults?.setObject(newValue.rawValue, forKey: "MotivationLevel")
+            defaults?.set(newValue.rawValue, forKey: "MotivationLevel")
 			defaults?.synchronize()
 
-			NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.motivationLevelDidChangeNotificationName, object: newValue.rawValue)
+            NotificationCenter.default.post(name: type(of: self).motivationLevelDidChangeNotification, object: newValue.rawValue)
 		}
 	}
 
 	private let defaults: ScreenSaverDefaults? = {
-		let bundleIdentifier = NSBundle(forClass: Preferences.self).bundleIdentifier
+        let bundleIdentifier = Bundle(for: Preferences.self).bundleIdentifier
 		return bundleIdentifier.flatMap { ScreenSaverDefaults(forModuleWithName: $0) }
 	}()
 }
